@@ -131,6 +131,16 @@ DatabasePtr DatabaseFactory::getImpl(const ASTCreateQuery & create, const String
         throw Exception(ErrorCodes::UNKNOWN_ELEMENT_IN_AST,
                         "Database engine `{}` cannot have parameters, primary_key, order_by, sample_by, settings", engine_name);
 
+    if (const ASTFunction * engine = engine_define->engine)
+    {
+        if (engine->arguments)
+        {
+            ASTs & engine_args = engine->arguments->children;
+            for (auto & engine_arg : engine_args)
+                engine_arg = evaluateConstantExpressionOrIdentifierAsLiteral(engine_arg, context);
+        }
+    }
+
     if (engine_name == "Ordinary")
         return std::make_shared<DatabaseOrdinary>(database_name, metadata_path, context);
     else if (engine_name == "Atomic")
@@ -139,6 +149,7 @@ DatabasePtr DatabaseFactory::getImpl(const ASTCreateQuery & create, const String
         return std::make_shared<DatabaseMemory>(database_name, context);
     else if (engine_name == "Dictionary")
         return std::make_shared<DatabaseDictionary>(database_name, context);
+
 
 #if USE_MYSQL
 
@@ -168,8 +179,6 @@ DatabasePtr DatabaseFactory::getImpl(const ASTCreateQuery & create, const String
                 throw Exception(ErrorCodes::BAD_ARGUMENTS,
                     "MySQL database require mysql_hostname, mysql_database_name, mysql_username, mysql_password arguments.");
 
-
-            arguments[1] = evaluateConstantExpressionOrIdentifierAsLiteral(arguments[1], context);
             const auto & host_port = safeGetLiteralValue<String>(arguments[0], engine_name);
 
             if (engine_name == "MySQL")
@@ -304,9 +313,6 @@ DatabasePtr DatabaseFactory::getImpl(const ASTCreateQuery & create, const String
                                 "PostgreSQL Database require `host:port`, `database_name`, `username`, `password`"
                                 "[, `schema` = "", `use_table_cache` = 0");
 
-            for (auto & engine_arg : engine_args)
-                engine_arg = evaluateConstantExpressionOrIdentifierAsLiteral(engine_arg, context);
-
             const auto & host_port = safeGetLiteralValue<String>(engine_args[0], engine_name);
             size_t max_addresses = context->getSettingsRef().glob_expansion_max_elements;
 
@@ -352,9 +358,6 @@ DatabasePtr DatabaseFactory::getImpl(const ASTCreateQuery & create, const String
             if (engine_args.size() != 4)
                 throw Exception(ErrorCodes::BAD_ARGUMENTS,
                                 "MaterializedPostgreSQL Database require `host:port`, `database_name`, `username`, `password`.");
-
-            for (auto & engine_arg : engine_args)
-                engine_arg = evaluateConstantExpressionOrIdentifierAsLiteral(engine_arg, context);
 
             auto parsed_host_port = parseAddress(safeGetLiteralValue<String>(engine_args[0], engine_name), 5432);
 
