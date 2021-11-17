@@ -30,7 +30,6 @@
 
 #if USE_MYSQL || USE_LIBPQXX
 #include <Common/parseRemoteDescription.h>
-#include <Interpreters/evaluateConstantExpression.h>
 #include <Common/parseAddress.h>
 #endif
 
