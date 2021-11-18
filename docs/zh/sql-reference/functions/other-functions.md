@@ -77,12 +77,12 @@ SELECT 'some-file-name' AS a, basename(a)
 
 如果将`NULL`作为参数传递给函数，那么它返回`Nullable（Nothing）`类型，它对应于ClickHouse中的内部`NULL`。
 
-## 块大小() {#function-blocksize}
+## blockSize() {#function-blocksize}
 
 获取Block的大小。
 在ClickHouse中，查询始终工作在Block（包含列的部分的集合）上。此函数允许您获取调用其的块的大小。
 
-## 实现(x) {#materializex}
+## materialize(x) {#materializex}
 
 将一个常量列变为一个非常量列。
 在ClickHouse中，非常量列和常量列在内存中的表示方式不同。尽管函数对于常量列和非常量总是返回相同的结果，但它们的工作方式可能完全不同（执行不同的代码）。此函数用于调试这种行为。
@@ -92,15 +92,15 @@ SELECT 'some-file-name' AS a, basename(a)
 接受任何参数，包括`NULL`。始终返回0。
 但是，函数的参数总是被计算的。该函数可以用于基准测试。
 
-## 睡眠（秒) {#sleepseconds}
+## sleep(seconds) {#sleepseconds}
 
 在每个Block上休眠’seconds’秒。可以是整数或浮点数。
 
-## sleepEachRow（秒) {#sleepeachrowseconds}
+## sleepEachRow（seconds) {#sleepeachrowseconds}
 
 在每行上休眠’seconds’秒。可以是整数或浮点数。
 
-## 当前数据库() {#currentdatabase}
+## currentDatabase() {#currentdatabase}
 
 返回当前数据库的名称。
 当您需要在CREATE TABLE中的表引擎参数中指定数据库，您可以使用此函数。
@@ -123,7 +123,7 @@ SELECT 'some-file-name' AS a, basename(a)
 如果表不存在，该函数将引发异常。
 对于嵌套数据结构中的元素，该函数检查是否存在列。 对于嵌套数据结构本身，函数返回0。
 
-## 酒吧 {#function-bar}
+## bar {#function-bar}
 
 使用unicode构建图表。
 
